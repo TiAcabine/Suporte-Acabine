@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="img/apple-icon-120x120.png" type="image/x-icon">
+    <title>Suporte TI - ACabine Materiais Elétricos</title>
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">    
+                <img src="img/acabine (2)_waifu2x_photo_noise3_scale.png" alt="Logo ACabine" class="logo-image">
+            </div>
+            <p>ABRA SEU CHAMADO ⬇️</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="success-message" id="successMessage">
+                <span class="icon">✅</span>
+                Sua solicitação foi enviada com sucesso! Nossa equipe de TI entrará em contato em breve.
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Enviando solicitação...</p>
+            </div>
+            
+            <form id="supportForm">
+                <div class="form-group">
+                    <label for="nome">
+                        <span class="icon">👤</span> Nome Completo
+                    </label>
+                    <input type="text" id="nome" name="nome" required placeholder="Digite seu nome completo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="setor">
+                        <span class="icon">🏢</span> Setor
+                    </label>
+                    <select id="setor" name="setor" required>
+                        <option value="">Selecione seu setor</option>
+                        <option value="Vendas">Vendas</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Compras">Compras</option>
+                        <option value="Expedição">Expedição</option>
+                        <option value="RH">Recursos Humanos</option>
+                        <option value="Presidência">Presidência</option>
+                        <option value="Diretoria">Diretoria</option>
+                        <option value="Portaria">Portaria</option>
+                        <option value="Oficina">Oficina</option>
+                        <option value="TI">Tecnologia da Informação</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">
+                        <span class="icon">📧</span> E-mail
+                    </label>
+                    <input type="email" id="email" name="email" required placeholder="seu.email@acabine.com.br">
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefone">
+                        <span class="icon">📱</span> Telefone/Ramal
+                    </label>
+                    <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999 ou Ramal: 123">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="icon">⚠️</span> Prioridade
+                    </label>
+                    <div class="priority-group">
+                        <div class="priority-option">
+                            <input type="radio" name="prioridade" value="Baixa" id="baixa" class="priority-baixa" checked>
+                            <label for="baixa" class="priority-label">Baixa</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" name="prioridade" value="Média" id="media" class="priority-media">
+                            <label for="media" class="priority-label">Média</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" name="prioridade" value="Alta" id="alta" class="priority-alta">
+                            <label for="alta" class="priority-label">Alta</label>
+                        </div>
+                </div>
+            </br>
+                <div class="form-group">
+                    <label>
+                        <span class="icon">⚙️</span> Problema com:
+                    </label>
+                    <div class="priority-group">
+                        <div class="priority-option">
+                            <input type="radio" name="equipamento" value="Computador" id="computador" class="priority-computador" checked>
+                            <label for="computador" class="priority-label">Computador</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" name="equipamento" value="Impressora" id="impressora" class="priority-impressora">
+                            <label for="impressora" class="priority-label">Impressora</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" name="equipamento" value="Perifericos" id="perifericos" class="priority-perifericos">
+                            <label for="perifericos" class="priority-label">Periféricos</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" name="equipamento" value="Outros" id="outros" class="priority-outros">
+                            <label for="outros" class="priority-label">Outros</label>
+                        </div>
+                    </div>    
+                </div>
+                
+                <div class="form-group">
+                    <label for="problema">
+                        <span class="icon">🔧</span> Descrição do Problema
+                    </label>
+                    <textarea id="problema" name="problema" required placeholder="Descreva detalhadamente o problema que está enfrentando..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <span class="icon">📨</span> Enviar Solicitação
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <script>
+        // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
+        emailjs.init("ar-62IWxTL59uCVf_");
+        
+        document.getElementById('supportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('supportForm').style.display = 'none';
+            
+            // Coletar dados do formulário
+            const formData = new FormData(this);
+            const templateParams = {
+                nome: formData.get('nome'),
+                setor: formData.get('setor'),
+                email: formData.get('email'),
+                telefone: formData.get('telefone'),
+                prioridade: formData.get('prioridade'),
+                equipamento: formData.get('equipamento'),
+                problema: formData.get('problema'),
+                to_email: 'ti@acabine.com.br',
+                data_hora: new Date().toLocaleString('pt-BR')
+            };
+            
+            // Enviar email real usando EmailJS
+            emailjs.send('service_lszzkth', 'template_z6uag69', templateParams)
+                .then(function(response) {
+                    console.log('Email enviado com sucesso!', response.status, response.text);
+                    
+                    // Esconder loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Mostrar mensagem de sucesso
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Resetar formulário após 3 segundos
+                    setTimeout(() => {
+                        document.getElementById('supportForm').reset();
+                        document.getElementById('successMessage').style.display = 'none';
+                        document.getElementById('supportForm').style.display = 'block';
+                    }, 3000);
+                    
+                }, function(error) {
+                    console.log('Erro ao enviar email:', error);
+                    
+                    // Esconder loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Mostrar erro
+                    alert('Erro ao enviar solicitação. Tente novamente ou contate o TI diretamente.');
+                    
+                    // Mostrar formulário novamente
+                    document.getElementById('supportForm').style.display = 'block';
+                });
+        });
+
+        // Máscara para telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 10) {
+                value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            } else {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
