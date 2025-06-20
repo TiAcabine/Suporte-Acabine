@@ -129,30 +129,41 @@
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
-    <script>
-        // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
+     <script>
+    // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
         emailjs.init("ar-62IWxTL59uCVf_");
         
         document.getElementById('supportForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // ADICIONAR: Verificar se pelo menos um equipamento foi selecionado
+            const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
+            if (equipamentos.length === 0) {
+                alert('Por favor, selecione pelo menos um tipo de equipamento.');
+                return;
+            }
+            
+            // ADICIONAR: Coletar todos os equipamentos selecionados
+            const equipamentosSelecionados = Array.from(equipamentos).map(eq => eq.value);
             
             // Mostrar loading
             document.getElementById('loading').style.display = 'block';
             document.getElementById('supportForm').style.display = 'none';
             
             // Coletar dados do formulário
-            const formData = new FormData(this);
             const templateParams = {
-                nome: formData.get('nome'),
-                setor: formData.get('setor'),
-                email: formData.get('email'),
-                telefone: formData.get('telefone'),
-                prioridade: formData.get('prioridade'),
-                equipamento: formData.get('equipamento'),
-                problema: formData.get('problema'),
+                nome: document.getElementById('nome').value,
+                setor: document.getElementById('setor').value,
+                email: document.getElementById('email').value,
+                telefone: document.getElementById('telefone').value,
+                prioridade: document.querySelector('input[name="prioridade"]:checked').value,
+                equipamento: equipamentosSelecionados.join(', '), // AGORA VAI FUNCIONAR
+                problema: document.getElementById('problema').value,
                 to_email: 'ti@acabine.com.br',
                 data_hora: new Date().toLocaleString('pt-BR')
             };
+            
+            console.log('Equipamentos selecionados:', equipamentosSelecionados); // Para debug
             
             // Enviar email real usando EmailJS
             emailjs.send('service_lszzkth', 'template_z6uag69', templateParams)
