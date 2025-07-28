@@ -11,7 +11,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
@@ -27,7 +27,7 @@
         .header {
             background: linear-gradient( rgb(150, 13, 13), rgb(104, 1, 1   ));
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             position: relative;
             font-weight: bolder;
@@ -75,7 +75,7 @@
         }
 
         .form-container {
-            padding: 40px;
+            padding: 30px;
         }
 
         .form-group {
@@ -122,7 +122,7 @@
 
         .priority-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-top: 10px;
         }
 
@@ -288,3 +288,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        html, body {
+        overflow-x: hidden;
+}
