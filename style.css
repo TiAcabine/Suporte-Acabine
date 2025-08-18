@@ -184,7 +184,7 @@
             color: white;
         }
 
-        .priority-impressora:checked + .priority-label {
+        .priority-hardware:checked + .priority-label {
             background:linear-gradient( #6d0505,  #7e2d2d,  #860808);
             border-color: #860808;
             color: white;
@@ -196,7 +196,7 @@
             color: white;
         }
 
-        .priority-perifericos:checked + .priority-label {
+        .priority-sistema:checked + .priority-label {
             background: linear-gradient( #6d0505,  #7e2d2d,  #860808);
             border-color: #860808;
             color: white;
@@ -292,3 +292,4 @@
         html, body {
         overflow-x: hidden;
 }
+
