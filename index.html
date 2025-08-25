@@ -262,7 +262,7 @@
             
             console.log('Enviando dados:', templateParams);
             console.log('Service ID:', 'service_jcvbhsr');
-            console.log('Template ID:', 'template_z6uag69');
+            console.log('Template ID:', 'template_yes0mds');
             
             // Verificar se EmailJS está disponível
             if (typeof emailjs === 'undefined') {
@@ -270,7 +270,7 @@
             }
             
             // Enviar email usando EmailJS com timeout
-            const envioPromise = emailjs.send('service_o4vzhs9', 'template_z6uag69', templateParams);
+            const envioPromise = emailjs.send('service_jcvbhsr', 'template_yes0mds', templateParams);
             
             // Adicionar timeout de 30 segundos
             const timeoutPromise = new Promise((_, reject) => {
@@ -382,5 +382,6 @@
     </script>
 </body>
 </html>
+
 
 
