@@ -1,4 +1,4 @@
- * {
+* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -177,7 +177,6 @@
             color: white;
         }
 
-
         .priority-computador:checked + .priority-label {
             background: linear-gradient( #6d0505,  #7e2d2d,  #860808);
             border-color: #860808;
@@ -290,6 +289,89 @@
         }
 
         html, body {
-        overflow-x: hidden;
-}
+            overflow-x: hidden;
+        }
 
+        /* NOVOS ESTILOS PARA UPLOAD DE IMAGENS */
+        .file-upload-area {
+            border: 2px dashed #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .file-upload-area:hover {
+            border-color: #3498db;
+            background: #fff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .file-upload-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-text {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #ecf0f1;
+        }
+
+        .image-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .remove-image:hover {
+            background: #c0392b;
+        }
+
+        .file-info {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
