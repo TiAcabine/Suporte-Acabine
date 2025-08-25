@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="img/favicon.png" type="image/x-icon">
     <title>Suporte TI - ACabine Materiais Elétricos</title>
-
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-content">    
-                <img src="img/acabine (2)_waifu2x_photo_noise3_scale.png" alt="Logo ACabine" class="logo-image">
+                <div class="logo-placeholder">ACABINE MATERIAIS ELÉTRICOS</div>
             </div>
             <p>ABRA SEU CHAMADO ⬇️</p>
         </div>
@@ -21,6 +18,11 @@
             <div class="success-message" id="successMessage">
                 <span class="icon">✅</span>
                 Sua solicitação foi enviada com sucesso! Nossa equipe de TI entrará em contato em breve.
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <span class="icon">❌</span>
+                <span id="errorText">Erro ao enviar solicitação. Tente novamente.</span>
             </div>
             
             <div class="loading" id="loading">
@@ -34,6 +36,7 @@
                         <span class="icon">👤</span> Nome Completo
                     </label>
                     <input type="text" id="nome" name="nome" required placeholder="Digite seu nome completo">
+                    <div class="validation-error" id="nome-error">Por favor, digite seu nome completo</div>
                 </div>
                 
                 <div class="form-group">
@@ -53,6 +56,7 @@
                         <option value="Oficina">Oficina</option>
                         <option value="TI">Tecnologia da Informação</option>
                     </select>
+                    <div class="validation-error" id="setor-error">Por favor, selecione seu setor</div>
                 </div>
                 
                 <div class="form-group">
@@ -60,6 +64,7 @@
                         <span class="icon">📧</span> E-mail
                     </label>
                     <input type="email" id="email" name="email" required placeholder="Seu email">
+                    <div class="validation-error" id="email-error">Por favor, digite um email válido</div>
                 </div>
                 
                 <div class="form-group">
@@ -86,30 +91,32 @@
                             <input type="radio" name="prioridade" value="Alta" id="alta" class="priority-alta">
                             <label for="alta" class="priority-label">Alta</label>
                         </div>
+                    </div>
                 </div>
-            </br>
+
                 <div class="form-group">
                     <label>
                         <span class="icon">⚙️</span> Problema com:
                     </label>
                     <div class="priority-group">
                         <div class="priority-option">
-                            <input type="checkbox" name="equipamento" value="Computador" id="computador" class="priority-computador" checked>
+                            <input type="checkbox" name="equipamento" value="Computador" id="computador" class="priority-computador">
                             <label for="computador" class="priority-label">Computador</label>
                         </div>
                         <div class="priority-option">
-                            <input type="checkbox" name="equipamento" value="Impressora" id="impressora" class="priority-impressora">
-                            <label for="impressora" class="priority-label">Hardware</label>
+                            <input type="checkbox" name="equipamento" value="Hardware" id="hardware" class="priority-hardware">
+                            <label for="hardware" class="priority-label">Hardware</label>
                         </div>
                         <div class="priority-option">
-                            <input type="checkbox" name="equipamento" value="Perifericos" id="perifericos" class="priority-perifericos">
-                            <label for="perifericos" class="priority-label">Sistema</label>
+                            <input type="checkbox" name="equipamento" value="Sistema" id="sistema" class="priority-sistema">
+                            <label for="sistema" class="priority-label">Sistema</label>
                         </div>
                         <div class="priority-option">
                             <input type="checkbox" name="equipamento" value="Outros" id="outros" class="priority-outros">
-                            <label for="checkbox" class="priority-label">Outros</label>
+                            <label for="outros" class="priority-label">Outros</label>
                         </div>
                     </div>    
+                    <div class="validation-error" id="equipamento-error">Por favor, selecione pelo menos um tipo de equipamento</div>
                 </div>
                 
                 <div class="form-group">
@@ -117,9 +124,10 @@
                         <span class="icon">🔧</span> Descrição do Problema
                     </label>
                     <textarea id="problema" name="problema" required placeholder="Descreva detalhadamente o problema que está enfrentando..."></textarea>
+                    <div class="validation-error" id="problema-error">Por favor, descreva o problema</div>
                 </div>
                 
-                <button type="submit" class="submit-btn">
+                <button type="submit" class="submit-btn" id="submitBtn">
                     <span class="icon">📨</span> Enviar Solicitação
                 </button>
             </form>
@@ -129,43 +137,125 @@
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
-     <script>
-    // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
+    <script>
+        // Inicializar EmailJS
         emailjs.init("ar-62IWxTL59uCVf_");
         
+        // Função para validar email
+        function validarEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        // Função para mostrar erro de validação
+        function mostrarErroValidacao(campo, mostrar = true) {
+            const formGroup = document.getElementById(campo).closest('.form-group');
+            const errorDiv = document.getElementById(campo + '-error');
+            
+            if (mostrar) {
+                formGroup.classList.add('error');
+                errorDiv.style.display = 'block';
+            } else {
+                formGroup.classList.remove('error');
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        // Função para validar formulário
+        function validarFormulario() {
+            let valido = true;
+            
+            // Validar nome
+            const nome = document.getElementById('nome').value.trim();
+            if (!nome || nome.length < 3) {
+                mostrarErroValidacao('nome', true);
+                valido = false;
+            } else {
+                mostrarErroValidacao('nome', false);
+            }
+            
+            // Validar setor
+            const setor = document.getElementById('setor').value;
+            if (!setor) {
+                mostrarErroValidacao('setor', true);
+                valido = false;
+            } else {
+                mostrarErroValidacao('setor', false);
+            }
+            
+            // Validar email
+            const email = document.getElementById('email').value.trim();
+            if (!email || !validarEmail(email)) {
+                mostrarErroValidacao('email', true);
+                valido = false;
+            } else {
+                mostrarErroValidacao('email', false);
+            }
+            
+            // Validar equipamentos selecionados
+            const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
+            if (equipamentos.length === 0) {
+                document.getElementById('equipamento-error').style.display = 'block';
+                valido = false;
+            } else {
+                document.getElementById('equipamento-error').style.display = 'none';
+            }
+            
+            // Validar descrição do problema
+            const problema = document.getElementById('problema').value.trim();
+            if (!problema || problema.length < 10) {
+                mostrarErroValidacao('problema', true);
+                valido = false;
+            } else {
+                mostrarErroValidacao('problema', false);
+            }
+            
+            return valido;
+        }
+
+        // Event listener para o formulário
         document.getElementById('supportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // ADICIONAR: Verificar se pelo menos um equipamento foi selecionado
-            const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
-            if (equipamentos.length === 0) {
-                alert('Por favor, selecione pelo menos um tipo de equipamento.');
+            // Validar formulário
+            if (!validarFormulario()) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorText').textContent = 'Por favor, corrija os erros no formulário.';
+                setTimeout(() => {
+                    document.getElementById('errorMessage').style.display = 'none';
+                }, 5000);
                 return;
             }
+
+            // Esconder mensagens anteriores
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
             
-            // ADICIONAR: Coletar todos os equipamentos selecionados
+            // Coletar equipamentos selecionados
+            const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
             const equipamentosSelecionados = Array.from(equipamentos).map(eq => eq.value);
             
-            // Mostrar loading
+            // Mostrar loading e desabilitar botão
             document.getElementById('loading').style.display = 'block';
             document.getElementById('supportForm').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
             
             // Coletar dados do formulário
             const templateParams = {
-                nome: document.getElementById('nome').value,
+                nome: document.getElementById('nome').value.trim(),
                 setor: document.getElementById('setor').value,
-                email: document.getElementById('email').value,
-                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value.trim(),
+                telefone: document.getElementById('telefone').value.trim() || 'Não informado',
                 prioridade: document.querySelector('input[name="prioridade"]:checked').value,
-                equipamento: equipamentosSelecionados.join(', '), // AGORA VAI FUNCIONAR
-                problema: document.getElementById('problema').value,
+                equipamento: equipamentosSelecionados.join(', '),
+                problema: document.getElementById('problema').value.trim(),
                 to_email: 'chamados@acabine.com.br',
                 data_hora: new Date().toLocaleString('pt-BR')
             };
             
-            console.log('Equipamentos selecionados:', equipamentosSelecionados); // Para debug
+            console.log('Enviando dados:', templateParams);
             
-            // Enviar email real usando EmailJS
+            // Enviar email usando EmailJS
             emailjs.send('service_o4vzhs9', 'template_z6uag69', templateParams)
                 .then(function(response) {
                     console.log('Email enviado com sucesso!', response.status, response.text);
@@ -176,24 +266,53 @@
                     // Mostrar mensagem de sucesso
                     document.getElementById('successMessage').style.display = 'block';
                     
-                    // Resetar formulário após 3 segundos
+                    // Resetar formulário após 5 segundos
                     setTimeout(() => {
                         document.getElementById('supportForm').reset();
                         document.getElementById('successMessage').style.display = 'none';
                         document.getElementById('supportForm').style.display = 'block';
-                    }, 3000);
+                        document.getElementById('submitBtn').disabled = false;
+                        
+                        // Resetar validações
+                        document.querySelectorAll('.form-group').forEach(group => {
+                            group.classList.remove('error');
+                        });
+                        document.querySelectorAll('.validation-error').forEach(error => {
+                            error.style.display = 'none';
+                        });
+                    }, 5000);
                     
-                }, function(error) {
-                    console.log('Erro ao enviar email:', error);
+                })
+                .catch(function(error) {
+                    console.error('Erro ao enviar email:', error);
                     
                     // Esconder loading
                     document.getElementById('loading').style.display = 'none';
                     
-                    // Mostrar erro
-                    alert('Erro ao enviar solicitação. Tente novamente ou contate o TI diretamente.');
+                    // Mostrar erro específico
+                    document.getElementById('errorMessage').style.display = 'block';
+                    let errorText = 'Erro ao enviar solicitação. ';
+                    
+                    if (error.status === 400) {
+                        errorText += 'Dados inválidos. Verifique as informações.';
+                    } else if (error.status === 401) {
+                        errorText += 'Erro de autenticação. Contate o TI.';
+                    } else if (error.status >= 500) {
+                        errorText += 'Erro no servidor. Tente novamente em alguns minutos.';
+                    } else {
+                        errorText += 'Tente novamente ou contate o TI diretamente.';
+                    }
+                    
+                    document.getElementById('errorText').textContent = errorText;
                     
                     // Mostrar formulário novamente
                     document.getElementById('supportForm').style.display = 'block';
+                    document.getElementById('submitBtn').disabled = false;
+                    
+                    // Esconder erro após 8 segundos
+                    setTimeout(() => {
+                        document.getElementById('errorMessage').style.display = 'none';
+                    }, 8000);
                 });
         });
 
@@ -207,7 +326,26 @@
             }
             e.target.value = value;
         });
+
+        // Remover erros quando o usuário começar a digitar
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('input', function() {
+                const fieldId = this.id;
+                if (fieldId) {
+                    mostrarErroValidacao(fieldId, false);
+                }
+            });
+        });
+
+        // Validação especial para checkboxes
+        document.querySelectorAll('input[name="equipamento"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
+                if (equipamentos.length > 0) {
+                    document.getElementById('equipamento-error').style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
-
