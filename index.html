@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="img/favicon.png" type="image/x-icon">
     <title>Suporte TI - ACabine Materiais Elétricos</title>
-
 </head>
 <body>
     <div class="container">
@@ -86,6 +85,7 @@
                             <input type="radio" name="prioridade" value="Alta" id="alta" class="priority-alta">
                             <label for="alta" class="priority-label">Alta</label>
                         </div>
+                    </div>
                 </div>
             </br>
                 <div class="form-group">
@@ -107,7 +107,7 @@
                         </div>
                         <div class="priority-option">
                             <input type="checkbox" name="equipamento" value="Outros" id="outros" class="priority-outros">
-                            <label for="checkbox" class="priority-label">Outros</label>
+                            <label for="outros" class="priority-label">Outros</label>
                         </div>
                     </div>    
                 </div>
@@ -117,6 +117,22 @@
                         <span class="icon">🔧</span> Descrição do Problema
                     </label>
                     <textarea id="problema" name="problema" required placeholder="Descreva detalhadamente o problema que está enfrentando..."></textarea>
+                </div>
+                
+                <!-- NOVA SEÇÃO PARA UPLOAD DE IMAGENS -->
+                <div class="form-group">
+                    <label>
+                        <span class="icon">📷</span> Anexar Imagens (Opcional)
+                    </label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="imageInput" name="images" class="file-upload-input" multiple accept="image/*">
+                        <div class="file-upload-text">
+                            <span class="icon">📁</span>
+                            Clique aqui ou arraste as imagens<br>
+                            <small>Formatos aceitos: JPG, PNG, GIF (máx. 5MB cada)</small>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
                 </div>
                 
                 <button type="submit" class="submit-btn">
@@ -129,72 +145,201 @@
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
-     <script>
-    // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
+    <script>
+        // Inicializar EmailJS (SUBSTITUA PELA SUA PUBLIC KEY)
         emailjs.init("ar-62IWxTL59uCVf_");
         
-        document.getElementById('supportForm').addEventListener('submit', function(e) {
+        // Array para armazenar as imagens selecionadas
+        let selectedImages = [];
+        
+        // Elementos do upload de imagens
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        // Event listeners para drag and drop
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+        
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+        
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFileSelection(files);
+        });
+        
+        // Event listener para seleção de arquivos
+        imageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFileSelection(files);
+        });
+        
+        // Função para lidar com a seleção de arquivos
+        function handleFileSelection(files) {
+            files.forEach(file => {
+                // Validar tipo de arquivo
+                if (!file.type.startsWith('image/')) {
+                    alert(`${file.name} não é um arquivo de imagem válido.`);
+                    return;
+                }
+                
+                // Validar tamanho do arquivo (5MB máximo)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`${file.name} é muito grande. Máximo 5MB por imagem.`);
+                    return;
+                }
+                
+                // Verificar se a imagem já foi selecionada
+                if (selectedImages.some(img => img.name === file.name && img.size === file.size)) {
+                    alert(`${file.name} já foi selecionada.`);
+                    return;
+                }
+                
+                // Adicionar imagem ao array
+                selectedImages.push(file);
+                
+                // Criar preview da imagem
+                createImagePreview(file, selectedImages.length - 1);
+            });
+        }
+        
+        // Função para criar preview da imagem
+        function createImagePreview(file, index) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+                    <div class="file-info">${file.name}</div>
+                `;
+                imagePreview.appendChild(imageItem);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Função para remover imagem
+        function removeImage(index) {
+            selectedImages.splice(index, 1);
+            updateImagePreview();
+        }
+        
+        // Função para atualizar preview das imagens
+        function updateImagePreview() {
+            imagePreview.innerHTML = '';
+            selectedImages.forEach((file, index) => {
+                createImagePreview(file, index);
+            });
+        }
+        
+        // Função para converter imagem para base64
+        function convertToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Event listener do formulário principal
+        document.getElementById('supportForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // ADICIONAR: Verificar se pelo menos um equipamento foi selecionado
+            // Verificar se pelo menos um equipamento foi selecionado
             const equipamentos = document.querySelectorAll('input[name="equipamento"]:checked');
             if (equipamentos.length === 0) {
                 alert('Por favor, selecione pelo menos um tipo de equipamento.');
                 return;
             }
             
-            // ADICIONAR: Coletar todos os equipamentos selecionados
+            // Coletar todos os equipamentos selecionados
             const equipamentosSelecionados = Array.from(equipamentos).map(eq => eq.value);
             
             // Mostrar loading
             document.getElementById('loading').style.display = 'block';
             document.getElementById('supportForm').style.display = 'none';
             
-            // Coletar dados do formulário
-            const templateParams = {
-                nome: document.getElementById('nome').value,
-                setor: document.getElementById('setor').value,
-                email: document.getElementById('email').value,
-                telefone: document.getElementById('telefone').value,
-                prioridade: document.querySelector('input[name="prioridade"]:checked').value,
-                equipamento: equipamentosSelecionados.join(', '), // AGORA VAI FUNCIONAR
-                problema: document.getElementById('problema').value,
-                to_email: 'chamados@acabine.com.br',
-                data_hora: new Date().toLocaleString('pt-BR')
-            };
-            
-            console.log('Equipamentos selecionados:', equipamentosSelecionados); // Para debug
-            
-            // Enviar email real usando EmailJS
-            emailjs.send('service_jcvbhsr', 'template_z6uag69', templateParams)
-                .then(function(response) {
-                    console.log('Email enviado com sucesso!', response.status, response.text);
-                    
-                    // Esconder loading
-                    document.getElementById('loading').style.display = 'none';
-                    
-                    // Mostrar mensagem de sucesso
-                    document.getElementById('successMessage').style.display = 'block';
-                    
-                    // Resetar formulário após 3 segundos
-                    setTimeout(() => {
-                        document.getElementById('supportForm').reset();
-                        document.getElementById('successMessage').style.display = 'none';
-                        document.getElementById('supportForm').style.display = 'block';
-                    }, 3000);
-                    
-                }, function(error) {
-                    console.log('Erro ao enviar email:', error);
-                    
-                    // Esconder loading
-                    document.getElementById('loading').style.display = 'none';
-                    
-                    // Mostrar erro
-                    alert('Erro ao enviar solicitação. Tente novamente ou contate o TI diretamente.');
-                    
-                    // Mostrar formulário novamente
+            try {
+                // Converter imagens para base64
+                let imagensBase64 = [];
+                let listaImagens = '';
+                
+                if (selectedImages.length > 0) {
+                    for (let i = 0; i < selectedImages.length; i++) {
+                        const base64 = await convertToBase64(selectedImages[i]);
+                        imagensBase64.push({
+                            name: selectedImages[i].name,
+                            data: base64
+                        });
+                        listaImagens += `${i + 1}. ${selectedImages[i].name}\n`;
+                    }
+                }
+                
+                // Coletar dados do formulário
+                const templateParams = {
+                    nome: document.getElementById('nome').value,
+                    setor: document.getElementById('setor').value,
+                    email: document.getElementById('email').value,
+                    telefone: document.getElementById('telefone').value,
+                    prioridade: document.querySelector('input[name="prioridade"]:checked').value,
+                    equipamento: equipamentosSelecionados.join(', '),
+                    problema: document.getElementById('problema').value,
+                    to_email: 'chamados@acabine.com.br',
+                    data_hora: new Date().toLocaleString('pt-BR'),
+                    imagens_lista: listaImagens || 'Nenhuma imagem anexada'
+                };
+                
+                // Adicionar imagens como anexos se houver
+                if (imagensBase64.length > 0) {
+                    imagensBase64.forEach((img, index) => {
+                        templateParams[`attachment_${index + 1}`] = img.data;
+                        templateParams[`attachment_${index + 1}_name`] = img.name;
+                    });
+                }
+                
+                console.log('Equipamentos selecionados:', equipamentosSelecionados);
+                console.log('Número de imagens:', selectedImages.length);
+                
+                // Enviar email usando EmailJS
+                const response = await emailjs.send('service_jcvbhsr', 'template_z6uag69', templateParams);
+                
+                console.log('Email enviado com sucesso!', response.status, response.text);
+                
+                // Esconder loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Mostrar mensagem de sucesso
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Resetar formulário após 3 segundos
+                setTimeout(() => {
+                    document.getElementById('supportForm').reset();
+                    selectedImages = [];
+                    imagePreview.innerHTML = '';
+                    document.getElementById('successMessage').style.display = 'none';
                     document.getElementById('supportForm').style.display = 'block';
-                });
+                }, 3000);
+                
+            } catch (error) {
+                console.log('Erro ao enviar email:', error);
+                
+                // Esconder loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Mostrar erro
+                alert('Erro ao enviar solicitação. Tente novamente ou contate o TI diretamente.');
+                
+                // Mostrar formulário novamente
+                document.getElementById('supportForm').style.display = 'block';
+            }
         });
 
         // Máscara para telefone
@@ -210,5 +355,3 @@
     </script>
 </body>
 </html>
-
-
