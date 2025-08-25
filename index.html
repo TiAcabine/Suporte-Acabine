@@ -11,7 +11,7 @@
     <div class="container">
         <div class="header">
             <div class="header-content">    
-                 <img src="img/acabine (2)_waifu2x_photo_noise3_scale.png" alt="Logo ACabine" class="logo-image">
+                <img src="img/acabine (2)_waifu2x_photo_noise3_scale.png" alt="Logo ACabine" class="logo-image">
             </div>
             <p>ABRA SEU CHAMADO ⬇️</p>
         </div>
@@ -140,8 +140,13 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
-        // Inicializar EmailJS
-        emailjs.init("ar-62IWxTL59uCVf_");
+        // Inicializar EmailJS com verificação
+        try {
+            emailjs.init("ar-62IWxTL59uCVf_");
+            console.log("EmailJS inicializado com sucesso");
+        } catch (error) {
+            console.error("Erro ao inicializar EmailJS:", error);
+        }
         
         // Função para validar email
         function validarEmail(email) {
@@ -244,23 +249,37 @@
             
             // Coletar dados do formulário
             const templateParams = {
-                nome: document.getElementById('nome').value.trim(),
+                from_name: document.getElementById('nome').value.trim(),
+                from_email: document.getElementById('email').value.trim(),
                 setor: document.getElementById('setor').value,
-                email: document.getElementById('email').value.trim(),
                 telefone: document.getElementById('telefone').value.trim() || 'Não informado',
                 prioridade: document.querySelector('input[name="prioridade"]:checked').value,
                 equipamento: equipamentosSelecionados.join(', '),
-                problema: document.getElementById('problema').value.trim(),
+                message: document.getElementById('problema').value.trim(),
                 to_email: 'chamados@acabine.com.br',
-                data_hora: new Date().toLocaleString('pt-BR')
+                reply_to: document.getElementById('email').value.trim()
             };
             
             console.log('Enviando dados:', templateParams);
+            console.log('Service ID:', 'service_o4vzhs9');
+            console.log('Template ID:', 'template_z6uag69');
             
-            // Enviar email usando EmailJS
-            emailjs.send('service_o4vzhs9', 'template_z6uag69', templateParams)
+            // Verificar se EmailJS está disponível
+            if (typeof emailjs === 'undefined') {
+                throw new Error('EmailJS não carregado');
+            }
+            
+            // Enviar email usando EmailJS com timeout
+            const envioPromise = emailjs.send('service_o4vzhs9', 'template_z6uag69', templateParams);
+            
+            // Adicionar timeout de 30 segundos
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout - Verifique sua conexão')), 30000);
+            });
+            
+            Promise.race([envioPromise, timeoutPromise])
                 .then(function(response) {
-                    console.log('Email enviado com sucesso!', response.status, response.text);
+                    console.log('Email enviado com sucesso!', response);
                     
                     // Esconder loading
                     document.getElementById('loading').style.display = 'none';
@@ -282,27 +301,39 @@
                         document.querySelectorAll('.validation-error').forEach(error => {
                             error.style.display = 'none';
                         });
+                        
+                        // Reselecionar "Baixa" prioridade
+                        document.getElementById('baixa').checked = true;
                     }, 5000);
                     
                 })
                 .catch(function(error) {
-                    console.error('Erro ao enviar email:', error);
+                    console.error('Erro completo:', error);
+                    console.error('Tipo do erro:', typeof error);
+                    console.error('Status:', error.status);
+                    console.error('Text:', error.text);
                     
                     // Esconder loading
                     document.getElementById('loading').style.display = 'none';
                     
                     // Mostrar erro específico
                     document.getElementById('errorMessage').style.display = 'block';
-                    let errorText = 'Erro ao enviar solicitação. ';
+                    let errorText = '';
                     
-                    if (error.status === 400) {
-                        errorText += 'Dados inválidos. Verifique as informações.';
-                    } else if (error.status === 401) {
-                        errorText += 'Erro de autenticação. Contate o TI.';
+                    if (error.message && error.message.includes('Timeout')) {
+                        errorText = 'Conexão lenta. Verifique sua internet e tente novamente.';
+                    } else if (error.status === 400 || error.text === 'Bad Request') {
+                        errorText = 'Template do EmailJS inválido. Contate o administrador.';
+                    } else if (error.status === 401 || error.text === 'Unauthorized') {
+                        errorText = 'Chave de API inválida. Contate o administrador.';
+                    } else if (error.status === 404) {
+                        errorText = 'Serviço EmailJS não encontrado. Contate o administrador.';
                     } else if (error.status >= 500) {
-                        errorText += 'Erro no servidor. Tente novamente em alguns minutos.';
+                        errorText = 'Erro no servidor EmailJS. Tente novamente em alguns minutos.';
+                    } else if (error.name === 'NetworkError' || !navigator.onLine) {
+                        errorText = 'Sem conexão com a internet. Verifique sua conexão.';
                     } else {
-                        errorText += 'Tente novamente ou contate o TI diretamente.';
+                        errorText = `Erro desconhecido: ${error.message || error.text || 'Contate o TI'}`;
                     }
                     
                     document.getElementById('errorText').textContent = errorText;
@@ -311,10 +342,10 @@
                     document.getElementById('supportForm').style.display = 'block';
                     document.getElementById('submitBtn').disabled = false;
                     
-                    // Esconder erro após 8 segundos
+                    // Esconder erro após 10 segundos
                     setTimeout(() => {
                         document.getElementById('errorMessage').style.display = 'none';
-                    }, 8000);
+                    }, 10000);
                 });
         });
 
@@ -351,5 +382,3 @@
     </script>
 </body>
 </html>
-
-
